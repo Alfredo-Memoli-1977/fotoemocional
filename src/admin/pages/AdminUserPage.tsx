@@ -138,7 +138,7 @@ export const AdminUserPage = () => {
                         cell.column.id !== "isAdmin" ? ( // la otra condición
                           <Input
                             className={cn(
-                              "text-center border-0 focus:border-2 focus-visible:border-yellow-500 ",
+                              "text-center border-0 focus:border-2 focus-visible:border-yellow-500 hover:cursor-pointer",
                             )}
                             value={String(cell.getValue())}
                             onChange={(e) => {
@@ -163,7 +163,7 @@ export const AdminUserPage = () => {
                             })}
                           >
                             <Checkbox
-                              className="border-yellow-500 data-[state=checked]:bg-yellow-500 data-[state=checked]:text-black"
+                              className="border-yellow-500 hover:cursor-pointer data-[state=checked]:bg-yellow-500 data-[state=checked]:text-black"
                               checked={Boolean(cell.getValue())}
                               onCheckedChange={(value) => {
                                 setEditData((prev) =>
