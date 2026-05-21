@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import type { Photo } from "@/interfaces/photo.interface";
@@ -7,8 +7,17 @@ import { ShoppingCart } from "lucide-react";
 
 export const PhotoCard = ({ photo }: { photo: Photo }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { id, title, description, orientation, preview_url, category, price } =
     photo;
+  const photoView = () => {
+    if (location.pathname === "/admin/photos") {
+      navigate("/admin/photo-editor");
+      return;
+    }
+    navigate(`/photo/${id}?orientation=${orientation}`);
+  };
+
   return (
     <Card
       // className="group border-0 shadow-none product-card-hover cursor-pointer w-60  m-5 xl:m-0 md:w-80 xl:w-120 bg-black"
@@ -26,7 +35,8 @@ export const PhotoCard = ({ photo }: { photo: Photo }) => {
         <Separator className=" w-full border-3 border-yellow-700 " />
         <div
           className="pt-2 px-4 space-y-3 bg-black rounded-b-2xl"
-          onClick={() => navigate(`/photo/${id}?orientation=${orientation}`)}
+          // onClick={() => navigate(`/photo/${id}?orientation=${orientation}`)}
+          onClick={photoView}
         >
           <div className="space-y-1 ">
             <h3 className="font-medium text-yellow-600 text-sm tracking-tight">

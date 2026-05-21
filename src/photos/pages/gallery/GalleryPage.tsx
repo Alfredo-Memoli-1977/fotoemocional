@@ -9,10 +9,12 @@ import { Filter } from "lucide-react";
 import { useState } from "react";
 import { FiltersGallery } from "@/photos/components/FiltersGallery";
 import { JumButron } from "@/components/custom/JumButron";
+import { useLocation } from "react-router-dom";
 
 export const GalleryPage = () => {
   const [open, setOpen] = useState(false);
   const { data, isPending, error } = usePhotos();
+  const location = useLocation();
 
   if (isPending) {
     return <PendingPage />;
@@ -27,11 +29,18 @@ export const GalleryPage = () => {
       {/* <h1 className="text-yellow-300 text-3xl md:text-4xl italic text-center ">
         Galeria
         </h1> */}
-      <JumButron
-        title="Mi Galeria de Imágenes"
-        subTitle="En esta sección podrás ver y adquirir mis fotos"
-      />
-      <img src="images/fotoEmocionalSF.png" />
+
+      {location.pathname === "/gallery" && (
+        <>
+          {" "}
+          <JumButron
+            title="Mi Galeria de Imágenes"
+            subTitle="En esta sección podrás ver y adquirir mis fotos"
+          />
+          <img src="/images/fotoEmocionalSF.png" />
+        </>
+      )}
+
       <div className="flex w-full justify-end items-end me-5">
         {/* filter desktop  */}
         <Button

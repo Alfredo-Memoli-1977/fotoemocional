@@ -15,6 +15,7 @@ import {
   AdminRoute,
   NotAuthenticatedRoutes,
 } from "./components/routes/ProtectedRoutes";
+import { AdminPhotoEditor } from "./admin/pages/AdminPhotoEditor";
 
 export const apprRouter = createBrowserRouter([
   {
@@ -89,6 +90,10 @@ export const apprRouter = createBrowserRouter([
       {
         path: "users",
         element: <AdminUserPage />,
+      },
+      {
+        path: "photo-editor",
+        element: <AdminPhotoEditor />,
       },
     ],
   },
