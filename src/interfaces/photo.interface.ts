@@ -11,3 +11,12 @@ export interface Photo {
 }
 
 export type Orientation = "landscape" | "portrait";
+
+export type Category =
+  | "mountain"
+  | "forest"
+  | "urban"
+  | "rural"
+  | "coast"
+  | "desert"
+  | "all";

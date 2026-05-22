@@ -5,7 +5,6 @@ import type { UserBack } from "@/interfaces/userBack.interface";
 export const patchUserUpdate = async (
   users: User[],
 ): Promise<{ success: boolean; error?: string }> => {
-  console.log({ users });
   const token = localStorage.getItem("token");
   const usersBack: UserBack[] = users.map((user) => ({
     id: user.id,
