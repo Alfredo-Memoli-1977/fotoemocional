@@ -15,51 +15,28 @@ import { useUserUpdate } from "../hooks/useUserUpdate";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
+import { Trash2 } from "lucide-react";
+import { AlertDialogDelUsr } from "../components/AlertDialogDelUsr";
 
-// const data = [
-//   {
-//     id: 1,
-//     name: "Ada",
-//     lastname: "Rosa",
-//     email: "ada@gmail.com",
-//     isAdmin: true,
-//   },
-//   {
-//     id: 1,
-//     name: "Ada",
-//     lastname: "Rosa",
-//     email: "ada@gmail.com",
-//     isAdmin: true,
-//   },
-//   {
-//     id: 1,
-//     name: "Ada",
-//     lastname: "Rosa",
-//     email: "ada@gmail.com",
-//     isAdmin: true,
-//   },
-// ];
 const columns = [
   { accessorKey: "id", header: "ID" },
   { accessorKey: "name", header: "Nombre" },
   { accessorKey: "lastname", header: "Apellido" },
   { accessorKey: "email", header: "Email" },
   { accessorKey: "isAdmin", header: "Administrador" },
+  {
+    accessorKey: "delete",
+    header: () => <Trash2 className="w-4 h-4 text-yellow-500 mx-auto" />,
+  },
 ];
 
 export const AdminUserPage = () => {
   const { data, isPending, error } = useUserAdmin();
-  // Carga las claves directamente del objeto y no tengo que crear las columnas a mano
-  // Problemas que al cargar las claves las hace como en el back y puede ser ilegible-> id name lastname email isAdmin
-  // const columns = data
-  //   ? Object.keys(data[0]).map((key) => ({
-  //       accessorKey: key,
-  //       header: key.toUpperCase(),
-  //     }))
-  //   : [];
 
   // Crea la tabla
   const [editData, setEditData] = useState<User[]>([]);
+  const [del, setDel] = useState<Record<number, boolean>>({});
+  const [open, setOpen] = useState(false);
   const updateUsers = useUserUpdate();
 
   // Le asigna a editData->data es al cargar
@@ -70,7 +47,9 @@ export const AdminUserPage = () => {
   }, [data]);
 
   // Si hay cambios en editData sera true
-  const hasChanges = JSON.stringify(data) !== JSON.stringify(editData);
+  const hasChanges =
+    JSON.stringify(data) !== JSON.stringify(editData) ||
+    Object.values(del).some(Boolean); // si hay cambios en el estado de del
   // tabla
   const table = useReactTable({
     data: editData ?? [],
@@ -85,10 +64,16 @@ export const AdminUserPage = () => {
   if (error) {
     return <ErrorPage />;
   }
-  // Enva los datos de la tabla para guardar
+
+  // Envia los datos de la tabla para guardar
   const update = async () => {
-    const response = await updateUsers.mutateAsync(editData);
+    // si usamos editData del primera no se actualiza antes de enviar al back mejor usar un auxiliar
+    const newEditData = editData.filter((user) => !del[user.id]);
+
+    const response = await updateUsers.mutateAsync(newEditData);
     if (response.success) {
+      setEditData(newEditData);
+      setDel({});
       toast.success("Usuarios actualizados");
     } else {
       toast.error(response.error);
@@ -124,69 +109,109 @@ export const AdminUserPage = () => {
                   const originalUser = data?.find(
                     (user) => user.id === row.original.id,
                   );
+                  const cellName = cell.column.id;
                   return (
                     <td
-                      className={cn(" border-2 border-yellow-500 text-center", {
+                      className={cn("border-2 border-yellow-500 text-center", {
+                        "w-12": cellName === "id" || cellName === "delete",
                         "bg-red-500":
-                          cell.getValue() !==
-                          originalUser?.[cell.column.id as keyof User],
+                          cellName === "delete"
+                            ? (del[row.original.id] ?? false)
+                            : cell.getValue() !==
+                              originalUser?.[cell.column.id as keyof User],
                       })}
                       key={cell.id}
                     >
                       {/* {flexRender(cell.column.columnDef.cell, cell.getContext())} */}
-                      {cell.column.id !== "id" ? ( // atención condición ternaria dentro de condición ternaria
-                        cell.column.id !== "isAdmin" ? ( // la otra condición
-                          <Input
-                            className={cn(
-                              "text-center border-0 focus:border-2 focus-visible:border-yellow-500 hover:cursor-pointer",
-                            )}
-                            value={String(cell.getValue())}
-                            onChange={(e) => {
-                              setEditData((prev) =>
-                                prev.map((user) =>
-                                  user.id === row.original.id
-                                    ? {
-                                        ...user,
-                                        [cell.column.id]: e.target.value,
-                                      }
-                                    : user,
-                                ),
-                              );
-                            }}
-                          />
-                        ) : (
-                          <div
-                            className={cn("flex justify-center items-center", {
-                              "bg-red-500":
-                                cell.getValue() !==
-                                originalUser?.[cell.column.id as keyof User],
-                            })}
-                          >
-                            <Checkbox
-                              className="border-yellow-500 hover:cursor-pointer data-[state=checked]:bg-yellow-500 data-[state=checked]:text-black"
-                              checked={Boolean(cell.getValue())}
-                              onCheckedChange={(value) => {
-                                setEditData((prev) =>
-                                  prev.map((user) =>
-                                    user.id === row.original.id
-                                      ? {
-                                          ...user,
-                                          isAdmin: Boolean(value),
-                                        }
-                                      : user,
-                                  ),
-                                );
-                              }}
-                            />
-                          </div> // termina la condición interior
-                        )
-                      ) : (
-                        flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext(),
-                        )
-                      )}
-                      {/* fin de las condiciones ternarias */}
+                      {(() => {
+                        switch (cellName) {
+                          case "id":
+                            return flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext(),
+                            );
+
+                          case "isAdmin":
+                            return (
+                              <div
+                                className={cn(
+                                  "flex justify-center items-center",
+                                  {
+                                    "bg-red-500":
+                                      cell.getValue() !==
+                                      originalUser?.[
+                                        cell.column.id as keyof User
+                                      ],
+                                  },
+                                )}
+                              >
+                                <Checkbox
+                                  className="border-yellow-500 hover:cursor-pointer data-[state=checked]:bg-yellow-500 data-[state=checked]:text-black"
+                                  checked={Boolean(cell.getValue())}
+                                  onCheckedChange={(value) => {
+                                    setEditData((prev) =>
+                                      prev.map((user) =>
+                                        user.id === row.original.id
+                                          ? {
+                                              ...user,
+                                              isAdmin: Boolean(value),
+                                            }
+                                          : user,
+                                      ),
+                                    );
+                                  }}
+                                />
+                              </div>
+                            );
+                          case "delete": {
+                            const isDeleting = del[row.original.id] ?? false;
+
+                            return (
+                              <div
+                                className={cn(
+                                  "flex justify-center items-center",
+                                  {
+                                    "bg-red-500": isDeleting,
+                                  },
+                                )}
+                              >
+                                <Checkbox
+                                  className="border-yellow-500 hover:cursor-pointer data-[state=checked]:bg-yellow-500 data-[state=checked]:text-black"
+                                  checked={isDeleting}
+                                  onCheckedChange={(checked) => {
+                                    setDel({
+                                      ...del,
+                                      [row.original.id]: checked === true,
+                                    });
+                                  }}
+                                />
+                              </div>
+                            );
+                          }
+
+                          default:
+                            return (
+                              <Input
+                                className={cn(
+                                  "text-center border-0 focus:border-2 focus-visible:border-yellow-500 hover:cursor-pointer",
+                                )}
+                                value={String(cell.getValue())}
+                                onChange={(e) => {
+                                  setEditData((prev) =>
+                                    prev.map((user) =>
+                                      user.id === row.original.id
+                                        ? {
+                                            ...user,
+                                            [cell.column.id]: e.target.value,
+                                          }
+                                        : user,
+                                    ),
+                                  );
+                                }}
+                              />
+                            );
+                        }
+                      })()}
                     </td>
                   );
                 })}
@@ -195,10 +220,19 @@ export const AdminUserPage = () => {
           </tbody>
         </table>
         <div className="flex mt-3 items-center justify-end w-full">
-          <Button variant={"myVariant"} disabled={!hasChanges} onClick={update}>
+          <Button
+            variant={"myVariant"}
+            disabled={!hasChanges}
+            onClick={
+              Object.values(del).some(Boolean) ? () => setOpen(!open) : update
+            }
+          >
             Guardar cambios
           </Button>
         </div>
+        {open && (
+          <AlertDialogDelUsr update={update} open={open} setOpen={setOpen} />
+        )}
       </div>
     </div>
   );

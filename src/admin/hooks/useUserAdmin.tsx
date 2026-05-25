@@ -7,6 +7,6 @@ export const useUserAdmin = () => {
     queryFn: () =>
       //La consulta
       getUserAdmin(),
-    staleTime: 1000 * 60 * 5, // Mantiene la consulta por 5 minutos si no hay cambios
+    // staleTime: 1000 * 60 * 5, // Mantiene la consulta por 5 minutos si no hay cambios
   });
 };
