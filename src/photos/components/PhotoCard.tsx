@@ -4,15 +4,24 @@ import { Card, CardContent } from "@/components/ui/card";
 import type { Photo } from "@/interfaces/photo.interface";
 import { Separator } from "@/components/ui/separator";
 import { ShoppingCart } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export const PhotoCard = ({ photo }: { photo: Photo }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { id, title, description, orientation, preview_url, category, price } =
-    photo;
+  const {
+    id,
+    title,
+    description,
+    orientation,
+    preview_url,
+    category,
+    price,
+    available,
+  } = photo;
   const photoView = () => {
     if (location.pathname === "/admin/photos") {
-      navigate("/admin/photo-editor");
+      navigate(`/admin/photo-editor?id=${id}&orientation=${orientation}`);
       return;
     }
     navigate(`/photo/${id}?orientation=${orientation}`);
@@ -21,16 +30,24 @@ export const PhotoCard = ({ photo }: { photo: Photo }) => {
   return (
     <Card
       // className="group border-0 shadow-none product-card-hover cursor-pointer w-60  m-5 xl:m-0 md:w-80 xl:w-120 bg-black"
-      className="group border-0 shadow-none product-card-hover cursor-pointer w-full   bg-black"
+      className={cn(
+        "group border-0 shadow-none product-card-hover cursor-pointer w-full bg-black ",
+        !available && "opacity-50",
+      )}
       // onClick={() => navigate(`/product/${id}`)}
     >
       <CardContent className=" p-0 rounded-2xl bg-white border-2 border-amber-400 ">
-        <div className="flex justify-center">
+        <div className="flex justify-center relative">
           <img
             src={preview_url}
             alt={title}
             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105 rounded-t-2xl"
           />
+          {!available && (
+            <p className="absolute inset-0 flex items-center justify-center text-white text-3xl">
+              No publicada
+            </p>
+          )}
         </div>
         <Separator className=" w-full border-3 border-yellow-700 " />
         <div
@@ -43,7 +60,7 @@ export const PhotoCard = ({ photo }: { photo: Photo }) => {
               {title}
             </h3>
             <p className="text-xs text-yellow-300 uppercase ">
-              {category} - {description}
+              {category} - {description} {!available && "No Publicada"}
               <br />
               {orientation}
             </p>

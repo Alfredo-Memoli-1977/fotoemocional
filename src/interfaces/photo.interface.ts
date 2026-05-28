@@ -20,3 +20,15 @@ export type Category =
   | "coast"
   | "desert"
   | "all";
+
+export const orientations: Orientation[] = ["landscape", "portrait"];
+
+export const categories: Category[] = [
+  "mountain",
+  "forest",
+  "urban",
+  "rural",
+  "coast",
+  "desert",
+  "all",
+];

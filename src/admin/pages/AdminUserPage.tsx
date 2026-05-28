@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Trash2 } from "lucide-react";
 import { AlertDialogDelUsr } from "../components/AlertDialogDelUsr";
+import { useQueryClient } from "@tanstack/react-query";
 
 const columns = [
   { accessorKey: "id", header: "ID" },
@@ -38,6 +39,7 @@ export const AdminUserPage = () => {
   const [del, setDel] = useState<Record<number, boolean>>({});
   const [open, setOpen] = useState(false);
   const updateUsers = useUserUpdate();
+  const queryClient = useQueryClient();
 
   // Le asigna a editData->data es al cargar
   useEffect(() => {
@@ -74,6 +76,7 @@ export const AdminUserPage = () => {
     if (response.success) {
       setEditData(newEditData);
       setDel({});
+      queryClient.invalidateQueries({ queryKey: ["users"] });
       toast.success("Usuarios actualizados");
     } else {
       toast.error(response.error);

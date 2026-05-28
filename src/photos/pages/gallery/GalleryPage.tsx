@@ -10,10 +10,12 @@ import { useState } from "react";
 import { FiltersGallery } from "@/photos/components/FiltersGallery";
 import { JumButron } from "@/components/custom/JumButron";
 import { useLocation } from "react-router-dom";
+import { useAuthStore } from "@/auth/store/auth.store";
 
 export const GalleryPage = () => {
   const [open, setOpen] = useState(false);
   const { data, isPending, error } = usePhotos();
+  const isAdmin = useAuthStore((state) => state.user?.isAdmin);
   const location = useLocation();
 
   if (isPending) {
@@ -23,6 +25,8 @@ export const GalleryPage = () => {
   if (error) {
     return <ErrorPage />;
   }
+
+  const allFalse = data?.some((photo) => photo.available);
 
   return (
     <div className="min-h-screen flex flex-col items-center  bg-black px-4 py-10">
@@ -67,27 +71,31 @@ export const GalleryPage = () => {
       {/* carga de imagenes */}
       <div
         className={cn(
-          !data || data.length === 0
+          !data || data.length === 0 || !allFalse
             ? "mt-6 grid items-center justify-center"
             : "mt-6 grid  gap-2  sm:grid-cols-2 xl:grid-cols-3 ",
         )}
       >
-        {!data || data.length === 0 ? (
+        {!data || data.length === 0 || !allFalse ? (
           // <div className=" flex items-center justify-center bg-pink-600">
           <h1 className="text-yellow-400 text-3xl ">
             No hay fotos para la selección actual
           </h1>
         ) : (
           // </div>
-          data?.map((photo) => (
+          data?.map((photo) =>
             // <img
             //   key={photo.id}
             //   src={photo.preview_url}
             //   className="w-40 h-40 object-cover bg-white"
             // />
 
-            <PhotoCard key={photo.id} photo={photo} />
-          ))
+            isAdmin ? (
+              <PhotoCard key={photo.id} photo={photo} />
+            ) : (
+              photo.available && <PhotoCard key={photo.id} photo={photo} />
+            ),
+          )
         )}
       </div>
     </div>
