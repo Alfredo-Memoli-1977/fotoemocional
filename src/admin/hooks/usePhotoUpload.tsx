@@ -1,13 +1,13 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { patchPhotoUpdate } from "../actions/patch-photoUpdate";
+import { postPhotoUpload } from "../actions/post-photoUpload";
 
-export const usePhotoUpdate = () => {
+export const usePhotoUpload = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationKey: ["photos"],
     mutationFn:
       //La consulta
-      patchPhotoUpdate,
+      postPhotoUpload,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["photos"] });
     },

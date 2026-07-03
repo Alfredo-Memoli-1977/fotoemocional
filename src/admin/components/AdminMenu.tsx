@@ -45,6 +45,14 @@ export const AdminMenu = ({ open, setOpen }: Props) => {
       >
         Administrar Usuarios
       </Link>
+      <Separator className=" w-full border-2 border-yellow-700  my-2" />
+      <Link
+        to="/admin/photo-uploader"
+        onClick={() => setOpen(!open)}
+        className="text-yellow-500"
+      >
+        Cargar Fotos
+      </Link>
     </div>
   );
 };

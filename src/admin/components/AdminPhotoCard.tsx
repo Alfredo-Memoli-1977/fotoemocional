@@ -18,6 +18,8 @@ export const AdminPhotoCard = ({ photo }: { photo: Photo }) => {
   const photoUpdateMutation = usePhotoUpdate();
   const queryClient = useQueryClient();
 
+  const hasChanges = JSON.stringify(photo) !== JSON.stringify(editPhoto);
+
   const {
     id,
     title,
@@ -32,7 +34,9 @@ export const AdminPhotoCard = ({ photo }: { photo: Photo }) => {
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
-    const { name, value } = e.target;
+    // const { name, value } = e.target;
+    const { name } = e.target;
+    const value = name === "price" ? Number(e.target.value) : e.target.value;
     setEditPhoto((prev) => ({
       ...prev,
       [name]: value,
@@ -54,7 +58,7 @@ export const AdminPhotoCard = ({ photo }: { photo: Photo }) => {
   return (
     <Card
       // className="group border-0 shadow-none product-card-hover cursor-pointer w-60  m-5 xl:m-0 md:w-80 xl:w-120 bg-black"
-      className="group border-0 shadow-none product-card-hover cursor-pointer w-2/4  bg-black"
+      className="group border-0 shadow-none product-card-hover cursor-pointer w-11/12 lg:w-2/4  bg-black"
       // onClick={() => navigate(`/product/${id}`)}
     >
       <CardContent className=" p-0 rounded-2xl bg-white border-2 border-amber-400 ">
@@ -117,7 +121,13 @@ export const AdminPhotoCard = ({ photo }: { photo: Photo }) => {
                 ))}
               </select>
               <p className="text-center">Precio: </p>
-              <Input name="price" value={price} onChange={handleInputChange} />
+              <Input
+                type="number"
+                name="price"
+                value={price}
+                onChange={handleInputChange}
+                className="appearance-none"
+              />
               <p className="text-center">Visible: </p>{" "}
               <Checkbox
                 checked={available}
@@ -136,6 +146,7 @@ export const AdminPhotoCard = ({ photo }: { photo: Photo }) => {
               size="sm"
               variant="myVariant"
               onClick={update}
+              disabled={!hasChanges}
               className="mb-1 opacity-0 group-hover:opacity-100 transition-all duration-300 "
             >
               Guardar Cambios
