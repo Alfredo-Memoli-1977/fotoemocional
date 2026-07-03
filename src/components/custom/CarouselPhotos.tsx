@@ -5,26 +5,15 @@ type Props = {
 };
 
 export const CarouselPhotos = ({ photos }: Props) => {
-  const [position, setPosition] = useState(0);
+  // const [position, setPosition] = useState(0);
   const [start, setStart] = useState(0);
   const [end, setEnd] = useState(1);
   const ref = useRef<HTMLDivElement>(null);
-  const [divWidth, setDivWidth] = useState(ref.current?.clientWidth || 0);
 
   useEffect(() => {
     if (!ref.current) return;
-    const observer = new ResizeObserver(([entry]) => {
-      const newWidth = entry.contentRect.width;
-      if (newWidth > 0) setDivWidth(newWidth); // Ignore zero widths
-      // console.log("Ref: ", ref);
-      // console.log("Client Width: ", ref.current?.clientWidth);
+    const observer = new ResizeObserver(() => {
       if (ref.current?.clientWidth) {
-        // let visiblePhotos;
-        // if (ref.current.clientWidth === 128) {
-        //   visiblePhotos = ref.current.clientWidth / 128;
-        // } else {
-        //   visiblePhotos = ref.current.clientWidth / 132;
-        // }
         const visiblePhotos =
           Math.floor(ref.current.clientWidth / 136) > 1
             ? Math.floor(ref.current.clientWidth / 136)
@@ -41,26 +30,9 @@ export const CarouselPhotos = ({ photos }: Props) => {
     });
     observer.observe(ref.current);
     return () => observer.disconnect();
-  }, []);
-
-  // useEffect(() => {
-  //   console.log("end actualizado:", end);
-  //   console.log("start actualizado:", start);
-  // }, [end]);
+  }, [end]);
 
   const handleCarousel = (num: number) => {
-    // let newPosition = position;
-    // if (newPosition === 0 && num === -1) return;
-    // if (newPosition === photos.length - 1 && num === 1) return;
-    // newPosition += num;
-    // setPosition(newPosition);
-    // if (num === 1 && end < (ref.current?.children.length ?? 0) - 2) {
-    //   return;
-    // }
-    // if (num === -1 && start === 0) {
-    //   return;
-    // }
-    // console.log(ref.current?.children[0].children.length);
     setEnd((prev) => prev + num);
     setStart((prev) => prev + num);
   };
