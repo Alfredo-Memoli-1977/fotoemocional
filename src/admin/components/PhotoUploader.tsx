@@ -19,7 +19,8 @@ export const PhotoUploader = () => {
   const [copy, setCopy] = useState(true);
   const { mutateAsync } = usePhotoUpload();
 
-  const path = photoFiles.map((photo) => URL.createObjectURL(photo));
+  // const path = photoFiles.map((photo) => URL.createObjectURL(photo));
+  //carga las fotos del drop y las guarda photoFiles
   const onDrop = useCallback(
     (acceptedFiles: FileWithPath[]) => {
       const newFiles = acceptedFiles.filter(
@@ -31,30 +32,17 @@ export const PhotoUploader = () => {
               photo.lastModified === file.lastModified,
           ),
       );
-
-      setPhotoFiles((prev) => [...prev, ...newFiles]);
-
-      if ((newFiles.length + photoFiles.length) % 2 === 0) {
-        const auxFiles = [...newFiles, ...photoFiles];
-        auxFiles.sort((a, b) => a.name.localeCompare(b.name));
-        for (let index = 0; index < auxFiles.length; index += 2) {
-          if (
-            auxFiles[index].name.slice(0, -3) !==
-            auxFiles[index + 1].name.slice(0, -3)
-          ) {
-            return setCopy(false);
-          }
-
-          setCopy(true);
-        }
-      } else {
-        setCopy(false);
-      }
+      const updateFiles = [...photoFiles, ...newFiles].sort((a, b) =>
+        a.name.localeCompare(b.name),
+      );
+      setPhotoFiles(updateFiles);
+      photoVerify(updateFiles);
     },
     [photoFiles],
   );
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
+  //Enviar fotos al backend
   const handleUpload = async () => {
     try {
       const submit = await mutateAsync(photoFiles);
@@ -64,12 +52,53 @@ export const PhotoUploader = () => {
         setCopy(true);
         return;
       }
+      if (submit.duplicates) {
+        toast.error(submit.error || "Error al guardar las imagenes");
+        const photoDuplicate = photoFiles.filter((file) =>
+          submit.duplicates?.includes(file.name),
+        );
+
+        setPhotoFiles(photoDuplicate);
+        photoVerify(photoDuplicate);
+      }
+
       toast.error(submit.error || "Error al guardar las imagenes");
     } catch (error) {
       toast.error("Error de comunicación con el servidor.");
     }
   };
+  //Borrar fotos del carrusel
+  const deletePhoto = (photo: FileWithPath) => {
+    const photoremove = photoFiles.filter(
+      (photofile) => photofile.name !== photo.name,
+    );
+    setPhotoFiles(photoremove);
+    photoVerify(photoremove);
+  };
 
+  //Verifica que existan pares de fotos por nombre pero distinta extensión
+  const photoVerify = (files: FileWithPath[]) => {
+    if (files.length === 0) {
+      setCopy(true);
+      return;
+    }
+
+    if (files.length % 2 !== 0) {
+      setCopy(false);
+      return;
+    }
+
+    for (let index = 0; index < files.length; index += 2) {
+      if (
+        files[index].name.slice(0, -3) !== files[index + 1].name.slice(0, -3)
+      ) {
+        setCopy(false);
+        return;
+      }
+    }
+
+    setCopy(true);
+  };
   return (
     <div className="flex flex-col items-center justify-center gap-2 m-2">
       <JumButron
@@ -77,7 +106,9 @@ export const PhotoUploader = () => {
         subTitle="Seleccione fotografías para cargar"
       />
 
-      {photoFiles.length !== 0 && <CarouselPhotos photos={path} />}
+      {photoFiles.length !== 0 && (
+        <CarouselPhotos photos={photoFiles} deletePhoto={deletePhoto} />
+      )}
       {photoFiles.length !== 0 && (
         <h1 className="text-yellow-500 text-3xl">
           Fotos seleccionadas: {photoFiles.length}

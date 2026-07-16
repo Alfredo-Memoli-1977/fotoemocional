@@ -2,13 +2,16 @@ import { useAuthStore } from "@/auth/store/auth.store";
 import { Button } from "../ui/button";
 import { Separator } from "../ui/separator";
 import { Link } from "react-router-dom";
+import { QrCode } from "lucide-react";
 
 type Props = {
   modal: boolean;
   setModal: React.Dispatch<React.SetStateAction<boolean>>;
+  qrModal: boolean;
+  setQrModal: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-export const UserModal = ({ modal, setModal }: Props) => {
+export const UserModal = ({ modal, setModal, qrModal, setQrModal }: Props) => {
   const { user, logout } = useAuthStore();
 
   const closeSesion = () => {
@@ -46,6 +49,16 @@ export const UserModal = ({ modal, setModal }: Props) => {
           </Link>
         </>
       )}
+      <Separator className=" w-full border-2 border-yellow-700  my-2" />
+      <Button
+        onClick={() => {
+          setModal(false);
+          setQrModal(!qrModal);
+        }}
+        className="flex items-center justify-start ps-0 gap-2 bg-black text-yellow-500 "
+      >
+        Abrir en el Móvil <QrCode className="w-5 h-5" />
+      </Button>
       <Separator className=" w-full border-2 border-yellow-700  my-2" />
       <Button onClick={closeSesion} variant={"myVariant"}>
         Cerrar Sesión

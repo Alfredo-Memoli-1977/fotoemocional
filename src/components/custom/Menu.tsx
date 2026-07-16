@@ -12,6 +12,7 @@ import { Button } from "../ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuthStore } from "@/auth/store/auth.store";
 import { UserModal } from "./UserModal";
+import { UseQrModal } from "./UseQrModal";
 
 type NavItem = {
   name: string;
@@ -34,6 +35,7 @@ export function Menu() {
   const location = useLocation();
   const [open, setOpen] = useState(false);
   const [modal, setModal] = useState(false);
+  const [qrModal, setQrModal] = useState(false);
   const navigate = useNavigate();
 
   const [searchParams, setSearchParams] = useSearchParams();
@@ -187,7 +189,22 @@ export function Menu() {
           onClick={() => setModal(!modal)}
         >
           <div className="flex h-full w-60 bg-transparent animate-in slide-in-from-right duration-300 mt-20 items-start justify-center">
-            <UserModal modal={modal} setModal={setModal} />
+            <UserModal
+              modal={modal}
+              setModal={setModal}
+              qrModal={qrModal}
+              setQrModal={setQrModal}
+            />
+          </div>
+        </div>
+      )}
+      {qrModal && (
+        <div
+          className="fixed inset-0 bg-transparent flex justify-center z-50 me-0.5"
+          onClick={() => setQrModal(false)}
+        >
+          <div className="flex h-full w-150 bg-transparent animate-in slide-in-from-right duration-300 mt-20 items-start justify-center">
+            <UseQrModal setQrModal={setQrModal} />
           </div>
         </div>
       )}

@@ -4,6 +4,8 @@ import type { AuthRequest } from "../interfaces/auth.interfaces";
 import { create } from "zustand";
 import { registerActions } from "../actions/register.actions";
 import { checkAuth } from "../actions/check-auth.actions";
+import { createQrToken } from "../actions/create-qr.actions";
+import { loginQrActions } from "../actions/login-qr.actions";
 
 type AuthStatus = "authenticated" | "not-authenticated" | "checking";
 // type Role = "admin" | "noAdmin";
@@ -26,6 +28,8 @@ type AuthState = {
   }: AuthRequest) => Promise<boolean>;
   logout: () => void;
   checkAuthStatus: () => Promise<boolean>;
+  createQrCode: () => Promise<string>;
+  verifyQrCode: (token: string) => Promise<boolean>;
 };
 
 export const useAuthStore = create<AuthState>()((set, get) => ({
@@ -82,5 +86,26 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       });
     }
     return false;
+  },
+  createQrCode: async () => {
+    try {
+      return await createQrToken();
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  },
+
+  verifyQrCode: async (token: string) => {
+    try {
+      const data = await loginQrActions(token);
+      localStorage.setItem("token", data.token);
+      set({ user: data.user, token: data.token, authStatus: "authenticated" });
+      return true;
+    } catch (error) {
+      localStorage.removeItem("token");
+      set({ user: null, token: null, authStatus: "not-authenticated" });
+      return false;
+    }
   },
 }));

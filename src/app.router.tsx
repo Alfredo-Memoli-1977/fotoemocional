@@ -17,6 +17,7 @@ import {
 } from "./components/routes/ProtectedRoutes";
 import { AdminPhotoEditor } from "./admin/pages/AdminPhotoEditor";
 import { PhotoUploader } from "./admin/components/PhotoUploader";
+import { QrLoginPage } from "./auth/pages/qrLogin/QrLoginPage";
 
 export const apprRouter = createBrowserRouter([
   {
@@ -68,6 +69,17 @@ export const apprRouter = createBrowserRouter([
       {
         path: "register",
         element: <RegisterPage />,
+      },
+    ],
+  },
+  //inicio por qr
+  {
+    path: "/auth/qr-login",
+    element: <AuthLayouts />,
+    children: [
+      {
+        index: true,
+        element: <QrLoginPage />,
       },
     ],
   },
